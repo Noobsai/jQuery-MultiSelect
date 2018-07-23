@@ -12,7 +12,7 @@
     background-color: #fff;
     padding: 5px 20px 5px 5px;
     margin-top: 1px;
-    font-size: 13px;
+    font-size: 10px;
     color: #aaa;
     outline-offset: -2px;
     white-space: nowrap;
@@ -46,8 +46,8 @@
 
 .ms-options-wrap > .ms-options {
     position: absolute;
-    left: 0;
-    width: 100%;
+    /*left: 0;*/
+    /*width: 100%;*/
     margin-top: 1px;
     margin-bottom: 20px;
     background: white;

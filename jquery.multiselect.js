@@ -5,6 +5,7 @@
  * @Contact: @JediNobleclem
  * @Website: springstubbe.us
  * @Source: https://github.com/nobleclem/jQuery-MultiSelect
+ * @License: The MIT License (MIT) https://github.com/nobleclem/jQuery-MultiSelect/blob/master/LICENSE
  *
  * Usage:
  *     $('select[multiple]').multiselect();
@@ -56,7 +57,7 @@
         // general options
         selectAll          : false, // add select all option
         selectGroup        : false, // select entire optgroup
-        minHeight          : 200,   // minimum height of option overlay
+        minHeight          : null,   // minimum height of option overlay
         maxHeight          : null,  // maximum height of option overlay
         maxWidth           : null,  // maximum width of option overlay (or selector)
         maxPlaceholderWidth: null,  // maximum width of placeholder button
@@ -157,8 +158,8 @@
             }
 
             // check if list is disabled
-            if( $(instance.element).prop( 'disabled' ) ) {
-                placeholder.prop( 'disabled', true );
+            if( $(instance.element).is( ':disabled' ) ) {
+                placeholder.attr( 'disabled', true );
             }
 
             // set placeholder maxWidth
@@ -199,7 +200,7 @@
             });
 
             // hide options menus if click happens off of the list placeholder button
-            $(document).off('click.ms-hideopts').on('click.ms-hideopts', function( event ){
+            $('body').bind('click', function (event) {
                 if( !$(event.target).closest('.ms-options-wrap').length ) {
                     $('.ms-options-wrap.ms-active > .ms-options').each(function(){
                         $(this).closest('.ms-options-wrap').removeClass('ms-active');
@@ -286,7 +287,7 @@
                 optionsList.before('<div class="ms-search"><input type="text" value="" placeholder="'+ instance.options.texts.search +'" /></div>');
 
                 var search = optionsWrap.find('.ms-search input');
-                search.on('keyup', function(){
+                search.live('keyup', function(){
                     // ignore keystrokes that don't make a difference
                     if( $(this).data('lastsearch') == $(this).val() ) {
                         return true;
@@ -340,7 +341,7 @@
             }
 
             // handle select all option
-            optionsWrap.on('click', '.ms-selectall', function( event ){
+            optionsWrap.find('.ms-selectall').live('click', function( event ){
                 event.preventDefault();
 
                 instance.updateSelectAll   = false;
@@ -353,12 +354,12 @@
                     if( optionsList.find('li:not(.optgroup, .selected, .ms-hidden)').length ) {
                         // get unselected vals, mark as selected, return val list
                         optionsList.find('li:not(.optgroup, .selected, .ms-hidden)').addClass('selected');
-                        optionsList.find('li.selected input[type="checkbox"]:not(:disabled)').prop( 'checked', true );
+                        optionsList.find('li.selected input[type="checkbox"]:not(:disabled)').attr( 'checked', true );
                     }
                     // deselect everything
                     else {
                         optionsList.find('li:not(.optgroup, .ms-hidden).selected').removeClass('selected');
-                        optionsList.find('li:not(.optgroup, .ms-hidden, .selected) input[type="checkbox"]:not(:disabled)').prop( 'checked', false );
+                        optionsList.find('li:not(.optgroup, .ms-hidden, .selected) input[type="checkbox"]:not(:disabled)').attr( 'checked', false );
                     }
                 }
                 else if( $(this).closest('li').hasClass('optgroup') ) {
@@ -367,12 +368,12 @@
                     // check if any selected if so then select them
                     if( optgroup.find('li:not(.selected, .ms-hidden)').length ) {
                         optgroup.find('li:not(.selected, .ms-hidden)').addClass('selected');
-                        optgroup.find('li.selected input[type="checkbox"]:not(:disabled)').prop( 'checked', true );
+                        optgroup.find('li.selected input[type="checkbox"]:not(:disabled)').attr( 'checked', true );
                     }
                     // deselect everything
                     else {
                         optgroup.find('li:not(.ms-hidden).selected').removeClass('selected');
-                        optgroup.find('li:not(.ms-hidden, .selected) input[type="checkbox"]:not(:disabled)').prop( 'checked', false );
+                        optgroup.find('li:not(.ms-hidden, .selected) input[type="checkbox"]:not(:disabled)').attr( 'checked', false );
                     }
                 }
 
@@ -413,7 +414,7 @@
                         groupOptions.push({
                             name   : $(this).text(),
                             value  : $(this).val(),
-                            checked: $(this).prop( 'selected' ),
+                            checked: $(this).attr( 'selected' ),
                             attributes: thisOptionAtts
                         });
                     });
@@ -436,7 +437,7 @@
                     options.push({
                         name      : $(this).text(),
                         value     : $(this).val(),
-                        checked   : $(this).prop( 'selected' ),
+                        checked   : $(this).attr('selected'),
                         attributes: thisOptionAtts
                     });
                 }
@@ -448,13 +449,13 @@
             instance.loadOptions( options, true, false );
 
             // BIND SELECT ACTION
-            optionsWrap.on( 'click', 'input[type="checkbox"]', function(){
+            optionsWrap.find('input[type = "checkbox"]').bind('click', function () {
                 $(this).closest( 'li' ).toggleClass( 'selected' );
 
                 var select = optionsWrap.parent().prev();
 
                 // toggle clicked option
-                select.find('option[value="'+ $(this).val() +'"]').prop(
+                select.find('option[value="' + $(this).val() + '"]').attr(
                     'selected', $(this).is(':checked')
                 ).closest('select').trigger('change');
 
@@ -468,10 +469,13 @@
             });
 
             // BIND FOCUS EVENT
-            optionsWrap.on('focusin', 'input[type="checkbox"]', function(){
-                $(this).closest('label').addClass('focused');
-            }).on('focusout', 'input[type="checkbox"]', function(){
-                $(this).closest('label').removeClass('focused');
+            optionsWrap.find('input[type = "checkbox"]').bind('focusin',
+                function() {
+                    $(this).closest('label').addClass('focused');
+                });
+            optionsWrap.find('input[type = "checkbox"]').bind('focusout',
+                function () {
+                    $(this).closest('label').removeClass('focused');
             });
 
             // USER CALLBACK
@@ -501,7 +505,6 @@
                 }
             }
 
-            var containers = [];
             for( var key in options ) {
                 // Prevent prototype methods injected into options from being iterated over.
                 if( !options.hasOwnProperty( key ) ) {
@@ -531,7 +534,7 @@
 
                         // mark option as selected
                         if( thisOption.checked ) {
-                            selOption.prop( 'selected', true );
+                            selOption.attr( 'selected', true );
                         }
 
                         select.append( selOption );
@@ -607,7 +610,7 @@
 
                             // mark option as selected
                             if( thisGOption.checked ) {
-                                selOption.prop( 'selected', true );
+                                selOption.attr( 'selected', true );
                             }
 
                             optGroup.append( selOption );
@@ -620,10 +623,9 @@
                 }
 
                 if( appendContainer ) {
-                    containers.push( container );
-                }
+                    optionsList.append(container);
+                }     
             }
-            optionsList.append( containers );
 
             // pad out label for room for the checkbox
             if( instance.options.checkboxAutoFit && instance.options.showCheckbox && !optionsWrap.hasClass('hide-checkbox') ) {
@@ -734,7 +736,7 @@
         reset: function() {
             var defaultVals = [];
             $(this.element).find('option').each(function(){
-                if( $(this).prop('defaultSelected') ) {
+                if( $(this).is(':defaultSelected') ) {
                     defaultVals.push( $(this).val() );
                 }
             });
@@ -746,9 +748,9 @@
 
         disable: function( status ) {
             status = (typeof status === 'boolean') ? status : true;
-            $(this.element).prop( 'disabled', status );
+            $(this.element).attr( 'disabled', status );
             $(this.element).next('.ms-options-wrap').find('button:first-child')
-                .prop( 'disabled', status );
+                .attr( 'disabled', status );
         },
 
         /** PRIVATE FUNCTIONS **/
@@ -830,7 +832,7 @@
                 placeholderTxt.text( instance.options.texts.placeholder );
             }
             // if copy is larger than button width use "# selected"
-            else if( (placeholderTxt.width() > placeholder.width()) || (selOpts.length != selectVals.length) ) {
+            else if( (placeholderTxt.width() > placeholder.width()) || (selOpts.length !== selectVals.length) ) {
                 placeholderTxt.text( selectVals.length + instance.options.texts.selectedOptions );
             }
         },
@@ -857,7 +859,7 @@
 
             if( option.checked ) {
                 container.addClass('default selected');
-                thisCheckbox.prop( 'checked', true );
+                thisCheckbox.attr('checked', true);
             }
 
             thisOption.prepend( thisCheckbox );
